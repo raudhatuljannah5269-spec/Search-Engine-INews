@@ -11,32 +11,44 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__, template_folder='../templates')
 
-# --- 1. INISIALISASI SASTRAWI ---
+# 1. INISIALISASI SASTRAWI
 factory = StopWordRemoverFactory()
 stopword = factory.create_stop_word_remover()
 stemmer = StemmerFactory().create_stemmer()
 
-# --- 2. LOAD DATA DARI COLAB (.pkl & .xlsx) ---
-# Menggunakan os.path agar path file fleksibel saat dideploy ke Vercel
+# 2. SEBAIKNYA LOAD DATA SECARA AMAN
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+processed_pkl_path = os.path.join(CURRENT_DIR, 'processed_artikel.pkl')
+excel_path = os.path.join(CURRENT_DIR, 'hasil_scraping_artikel.xlsx')
 
-# Load artikel yang sudah dipreprocess (.pkl)
-with open(os.path.join(CURRENT_DIR, 'processed_artikel.pkl'), 'rb') as f:
-    processed_paper = pickle.load(f)
+processed_paper = []
+paper = []
 
-# Load data asli dari Excel untuk menampilkan Judul, Tanggal, Isi, dan Link
-paper_x = pd.read_excel(os.path.join(CURRENT_DIR, 'hasil_scraping_artikel.xlsx'))
-paper = paper_x.values.tolist()
+# Cek & Load file .pkl
+if os.path.exists(processed_pkl_path):
+    with open(processed_pkl_path, 'rb') as f:
+        processed_paper = pickle.load(f)
+else:
+    print(f"⚠️ Peringatan: File {processed_pkl_path} tidak ditemukan!")
 
-# Tentukan indeks kolom sesuai data Excel Anda
+# Cek & Load file .xlsx
+if os.path.exists(excel_path):
+    paper_x = pd.read_excel(excel_path)
+    paper = paper_x.values.tolist()
+else:
+    print(f"⚠️ Peringatan: File {excel_path} tidak ditemukan!")
+
+# Index kolom sesuai data Colab kamu
 IDX_LINK    = 1   
 IDX_JUDUL   = 2
 IDX_TANGGAL = 3
 IDX_ISI     = 4
 
-# --- 3. FUNGSI PENCARIAN TF-IDF & COSINE SIMILARITY ---
+# 3. FUNGSI LOGIKA PENCARIAN (DARI COLAB KAMU)
 def search_articles(query_raw, top_n=5):
-    # Preprocessing Query (Sama persis dengan sistem di Colab Anda)
+    if not processed_paper or not paper:
+        return []
+
     query = query_raw.lower()
     remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
     query = query.translate(remove_punctuation_map)
@@ -47,12 +59,9 @@ def search_articles(query_raw, top_n=5):
     if not query:
         return []
 
-    # Hitung TF-IDF & Cosine Similarity
     vectorizer2 = TfidfVectorizer(use_idf=True)
     corpus = [' '.join(query)] + processed_paper
     tfidf_matrix = vectorizer2.fit_transform(corpus)
-    
-    # Similarity baris pertama (query) dengan baris sisanya (dokumen-dokumen)
     scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
     ranked_idx = np.argsort(-scores)
 
@@ -64,7 +73,7 @@ def search_articles(query_raw, top_n=5):
         if i not in seen:
             seen.add(i)
             
-            # Ambil cuplikan isi (preview) maksimal 250 karakter
+            # Batasi isi pratinjau teks artikel agar rapi
             isi_full = str(paper[i][IDX_ISI])
             isi_preview = isi_full[:250] + '...' if len(isi_full) > 250 else isi_full
             
@@ -80,11 +89,11 @@ def search_articles(query_raw, top_n=5):
             break
     return results
 
-# --- 4. ROUTE FLASK ---
+# 4. PATH ROUTING WEB FLASK
 @app.route('/')
 def home():
     query = request.args.get('q', '')
-    limit = request.args.get('limit', 5, type=int) # Default menampilkan 5 hasil
+    limit = request.args.get('limit', 5, type=int)
     results = []
     
     if query:
@@ -92,5 +101,10 @@ def home():
         
     return render_template('index.html', query=query, results=results, limit=limit)
 
-# Handler untuk Vercel Serverless
+# Diperlukan untuk Vercel Serverless
 app.wsgi_app = app.wsgi_app
+
+# PERINTAH UTAMA UNTUK MENYALAKAN SERVER LOKAL DI WINDOWS
+if __name__ == '__main__':
+    print("Menyalakan server lokal...")
+    app.run(debug=True, port=5000)
