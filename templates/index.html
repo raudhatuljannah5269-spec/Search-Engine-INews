@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySearch - Mesin Pencari Python</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #fdfdfd; }
+        .wrapper { max-width: 650px; margin: 0 auto; padding-top: 40px; }
+        .logo { text-align: center; font-size: 2.5rem; margin-bottom: 20px; color: #202124; }
+        .box-cari { display: flex; border: 1px solid #dfe1e5; border-radius: 24px; padding: 2px 15px; background: #fff; box-shadow: 0 1px 6px rgba(32,33,36,0.28); }
+        .box-cari input { flex: 1; height: 45px; border: none; outline: none; font-size: 16px; }
+        .box-cari button { background: none; border: none; color: #4285f4; font-size: 16px; font-weight: bold; cursor: pointer; padding: 0 10px; }
+        .item-hasil { margin-top: 25px; margin-bottom: 25px; }
+        .item-hasil .url { font-size: 14px; color: #202124; margin-bottom: 4px; word-break: break-all; }
+        .item-hasil .judul { font-size: 20px; color: #1a0dab; text-decoration: none; }
+        .item-hasil .judul:hover { text-decoration: underline; }
+        .item-hasil .rangkuman { font-size: 14px; color: #4d5156; margin-top: 5px; line-height: 1.42; }
+        .kosong { text-align: center; margin-top: 5px; color: #70757a; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="logo">🔍 PySearch</div>
+    
+    <!-- Form Pencarian -->
+    <form action="/" method="GET" class="box-cari">
+        <input type="text" name="q" placeholder="Ketik sesuatu di sini..." value="{{ query }}" required>
+        <button type="submit">Cari</button>
+    </form>
+
+    <!-- Tempat Menampilkan Hasil dari Python -->
+    <div style="margin-top: 30px;">
+        {% if query %}
+            {% if results %}
+                {% for item in results %}
+                    <div class="item-hasil">
+                        <div class="url">{{ item.url }}</div>
+                        <a class="judul" href="{{ item.url }}" target="_blank">{{ item.title }}</a>
+                        <div class="rangkuman">{{ item.snippet }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="kosong">Tidak ada hasil pencarian yang cocok untuk "{{ query }}".</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
