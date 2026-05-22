@@ -1,48 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PySearch - Mesin Pencari Python</title>
+    <title>Pencarian Artikel AI</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #fdfdfd; }
-        .wrapper { max-width: 650px; margin: 0 auto; padding-top: 40px; }
-        .logo { text-align: center; font-size: 2.5rem; margin-bottom: 20px; color: #202124; }
-        .box-cari { display: flex; border: 1px solid #dfe1e5; border-radius: 24px; padding: 2px 15px; background: #fff; box-shadow: 0 1px 6px rgba(32,33,36,0.28); }
-        .box-cari input { flex: 1; height: 45px; border: none; outline: none; font-size: 16px; }
-        .box-cari button { background: none; border: none; color: #4285f4; font-size: 16px; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .item-hasil { margin-top: 25px; margin-bottom: 25px; }
-        .item-hasil .url { font-size: 14px; color: #202124; margin-bottom: 4px; word-break: break-all; }
-        .item-hasil .judul { font-size: 20px; color: #1a0dab; text-decoration: none; }
-        .item-hasil .judul:hover { text-decoration: underline; }
-        .item-hasil .rangkuman { font-size: 14px; color: #4d5156; margin-top: 5px; line-height: 1.42; }
-        .kosong { text-align: center; margin-top: 5px; color: #70757a; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; color: #202124; }
+        .wrapper { max-width: 750px; margin: 0 auto; padding-top: 20px; }
+        
+        .header-panel { background:#fff; border-radius:12px; padding:16px 20px; margin-bottom:16px; border:1px solid #e0e0e0; }
+        .header-title { font-size:22px; font-weight:700; color:#202124; }
+        
+        .search-bar-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+        .search-input { flex: 1; height: 38px; border: 1px solid #ccc; border-radius: 6px; padding: 0 12px; font-size: 15px; outline: none; }
+        .search-input:focus { border-color: #1a73e8; }
+        .select-limit { height: 40px; border-radius: 6px; border: 1px solid #ccc; padding: 0 8px; font-size: 14px; background: white; }
+        
+        .btn { height: 40px; padding: 0 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+        .btn-search { background: #1a73e8; color: white; }
+        .btn-search:hover { background: #1557b0; }
+        .btn-reset { background: #f1f3f4; color: #3c4043; }
+        .btn-reset:hover { background: #e8eaed; }
+
+        .info-text { font-size: 13px; color: #5f6368; margin-bottom: 14px; }
+        .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; color: #333; font-weight: bold; }
+
+        .card-hasil { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:16px 20px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        .card-top { display:flex; justify-content:between; justify-content: space-between; align-items:center; }
+        .badge-skor { background:#e8f0fe; color:#1a73e8; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; }
+        .text-tanggal { font-size:12px; color:#888; }
+        .card-judul { margin-top:12px; font-size:18px; font-weight:600; color:#202124; line-height:1.4; }
+        .card-isi { margin-top:8px; font-size:13px; color:#5f6368; line-height:1.6; }
+        .card-link { display:inline-block; margin-top:12px; font-size:13px; color:#1a73e8; text-decoration:none; font-weight:500; }
+        .card-link:hover { text-decoration: underline; }
+        .no-link { font-size:12px; color:#aaa; margin-top:12px; display:inline-block; }
+        
+        .kosong { text-align:center; color:#888; padding: 30px; background: white; border-radius: 8px; border: 1px solid #e0e0e0; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <div class="logo">🔍 PySearch</div>
+    <div class="header-panel">
+        <div class="header-title">📰 Pencarian Artikel AI</div>
+    </div>
     
-    <!-- Form Pencarian -->
-    <form action="/" method="GET" class="box-cari">
-        <input type="text" name="q" placeholder="Ketik sesuatu di sini..." value="{{ query }}" required>
-        <button type="submit">Cari</button>
+    <form action="/" method="GET" class="search-bar-container">
+        <input type="text" name="q" class="search-input" placeholder="Masukkan kata kunci artikel..." value="{{ query }}" required>
+        
+        <select name="limit" class="select-limit">
+            <option value="5" {% if limit == 5 %}selected{% endif %}>Tampilkan: 5</option>
+            <option value="10" {% if limit == 10 %}selected{% endif %}>Tampilkan: 10</option>
+            <option value="15" {% if limit == 15 %}selected{% endif %}>Tampilkan: 15</option>
+            <option value="20" {% if limit == 20 %}selected{% endif %}>Tampilkan: 20</option>
+        </select>
+
+        <button type="submit" class="btn btn-search">🔍 Cari</button>
+        <a href="/" class="btn btn-reset">✕ Reset</a>
     </form>
 
-    <!-- Tempat Menampilkan Hasil dari Python -->
-    <div style="margin-top: 30px;">
+    <div>
         {% if query %}
+            <div class="info-text">
+                Menampilkan <b>{{ results|length }}</b> hasil untuk query: <span class="highlight">"{{ query }}"</span>
+            </div>
+
             {% if results %}
                 {% for item in results %}
-                    <div class="item-hasil">
-                        <div class="url">{{ item.url }}</div>
-                        <a class="judul" href="{{ item.url }}" target="_blank">{{ item.title }}</a>
-                        <div class="rangkuman">{{ item.snippet }}</div>
+                    <div class="card-hasil">
+                        <div class="card-top">
+                            <span class="badge-skor">#{{ item.rank }} &nbsp;·&nbsp; Skor: {{ item.score }}</span>
+                            <span class="text-tanggal">📅 {{ item.tanggal }}</span>
+                        </div>
+                        <div class="card-judul">{{ item.judul }}</div>
+                        <div class="card-isi">{{ item.isi }}</div>
+                        
+                        {% if item.link and item.link.startswith('http') %}
+                            <a href="{{ item.link }}" target="_blank" class="card-link">🔗 Baca artikel lengkap</a>
+                        {% else %}
+                            <span class="no-link">Link tidak tersedia</span>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
-                <p class="kosong">Tidak ada hasil pencarian yang cocok untuk "{{ query }}".</p>
+                <div class="kosong">
+                    Tidak ada hasil ditemukan yang cocok dengan kata kunci tersebut.
+                </div>
             {% endif %}
         {% endif %}
     </div>
