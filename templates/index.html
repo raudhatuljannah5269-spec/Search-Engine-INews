@@ -1,95 +1,631 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencarian Artikel AI</title>
-    <style>
-        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; color: #202124; }
-        .wrapper { max-width: 750px; margin: 0 auto; padding-top: 20px; }
-        
-        .header-panel { background:#fff; border-radius:12px; padding:16px 20px; margin-bottom:16px; border:1px solid #e0e0e0; }
-        .header-title { font-size:22px; font-weight:700; color:#202124; }
-        
-        .search-bar-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-        .search-input { flex: 1; height: 38px; border: 1px solid #ccc; border-radius: 6px; padding: 0 12px; font-size: 15px; outline: none; }
-        .search-input:focus { border-color: #1a73e8; }
-        .select-limit { height: 40px; border-radius: 6px; border: 1px solid #ccc; padding: 0 8px; font-size: 14px; background: white; }
-        
-        .btn { height: 40px; padding: 0 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
-        .btn-search { background: #1a73e8; color: white; }
-        .btn-search:hover { background: #1557b0; }
-        .btn-reset { background: #f1f3f4; color: #3c4043; }
-        .btn-reset:hover { background: #e8eaed; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Article Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .info-text { font-size: 13px; color: #5f6368; margin-bottom: 14px; }
-        .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; color: #333; font-weight: bold; }
+:root {
+  --bg:        #050d1a;
+  --surface:   #0b1628;
+  --surface2:  #0f1e35;
+  --border:    rgba(99,179,255,0.10);
+  --border2:   rgba(99,179,255,0.22);
+  --accent:    #3b82f6;
+  --accent2:   #6366f1;
+  --accent3:   #06b6d4;
+  --text:      #e8f0fe;
+  --text2:     #8ba6c8;
+  --text3:     #4d6b8a;
+  --radius:    10px;
+  --radius-lg: 14px;
+}
 
-        .card-hasil { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:16px 20px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-        .card-top { display:flex; justify-content:between; justify-content: space-between; align-items:center; }
-        .badge-skor { background:#e8f0fe; color:#1a73e8; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; }
-        .text-tanggal { font-size:12px; color:#888; }
-        .card-judul { margin-top:12px; font-size:18px; font-weight:600; color:#202124; line-height:1.4; }
-        .card-isi { margin-top:8px; font-size:13px; color:#5f6368; line-height:1.6; }
-        .card-link { display:inline-block; margin-top:12px; font-size:13px; color:#1a73e8; text-decoration:none; font-weight:500; }
-        .card-link:hover { text-decoration: underline; }
-        .no-link { font-size:12px; color:#aaa; margin-top:12px; display:inline-block; }
-        
-        .kosong { text-align:center; color:#888; padding: 30px; background: white; border-radius: 8px; border: 1px solid #e0e0e0; }
-    </style>
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Animated canvas background ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ── Layout ── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+
+/* ── Header ── */
+.header { text-align: center; margin-bottom: 44px; }
+
+.logo-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.20);
+  border-radius: 50px;
+  padding: 6px 16px 6px 10px;
+  margin-bottom: 24px;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .5; transform: scale(.75); }
+}
+.logo-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.header h1 span {
+  background: linear-gradient(90deg, #60a5fa, #818cf8, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header p {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* ── Search card ── */
+.search-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon {
+  position: absolute;
+  left: 14px;
+  width: 17px; height: 17px;
+  opacity: .45;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  height: 46px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 0 14px 0 42px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus {
+  border-color: rgba(99,130,246,.55);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.10);
+}
+
+.select-limit {
+  height: 46px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 0 12px;
+  outline: none;
+  cursor: pointer;
+  min-width: 108px;
+  transition: border-color .2s;
+}
+.select-limit:focus { border-color: rgba(99,130,246,.55); }
+
+.btn-search {
+  height: 46px;
+  padding: 0 22px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: .01em;
+  transition: opacity .2s, transform .12s;
+}
+.btn-search:hover  { opacity: .88; }
+.btn-search:active { transform: scale(.97); }
+
+.btn-reset {
+  height: 46px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: background .2s, border-color .2s;
+}
+.btn-reset:hover { background: rgba(255,255,255,.04); border-color: var(--border); }
+
+/* ── Info bar ── */
+.info-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text2);
+  padding: 10px 4px;
+  margin-bottom: 20px;
+}
+.info-bar svg { opacity: .5; flex-shrink: 0; }
+.info-kw {
+  font-weight: 600;
+  color: #93c5fd;
+}
+.info-count {
+  margin-left: auto;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.22);
+  border-radius: 50px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+/* ── Result card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .15s;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59,130,246,.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.card:hover {
+  border-color: rgba(99,130,246,.30);
+  transform: translateY(-1px);
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.rank-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(59,130,246,.10);
+  border: 1px solid rgba(59,130,246,.20);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #60a5fa;
+  letter-spacing: .02em;
+}
+.rank-badge svg { opacity: .7; }
+
+.score-pip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text3);
+}
+.score-bar-wrap {
+  width: 56px;
+  height: 4px;
+  background: rgba(255,255,255,.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.score-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+}
+
+.date-pill {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text3);
+}
+.date-pill svg { opacity: .5; }
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e8f0fe;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+
+.card-snippet {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #60a5fa;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid rgba(59,130,246,.25);
+  border-radius: 7px;
+  background: rgba(59,130,246,.06);
+  transition: background .2s, border-color .2s;
+}
+.read-link:hover { background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.45); }
+.read-link svg { opacity: .75; }
+
+.no-link {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Empty / idle ── */
+.state-empty {
+  text-align: center;
+  padding: 56px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.state-empty .icon-wrap {
+  width: 56px; height: 56px;
+  margin: 0 auto 16px;
+  background: rgba(59,130,246,.08);
+  border: 1px solid rgba(59,130,246,.18);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.state-empty svg { opacity: .5; }
+.state-empty h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.state-empty p  { font-size: 13px; color: var(--text2); }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 0 20px;
+}
+
+@media (max-width: 560px) {
+  .search-row { flex-wrap: wrap; }
+  .select-limit, .btn-reset { display: none; }
+  .btn-search { flex: 1; justify-content: center; }
+  .card { padding: 18px 16px; }
+}
+</style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="header-panel">
-        <div class="header-title">📰 Pencarian Artikel AI</div>
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-row">
+      <div class="logo-dot"></div>
+      <span class="logo-text">Search Engine - Kelompok 2</span>
     </div>
-    
-    <form action="/" method="GET" class="search-bar-container">
-        <input type="text" name="q" class="search-input" placeholder="Masukkan kata kunci artikel..." value="{{ query }}" required>
-        
+    <h1>Cari Artikel<br><span>Berita Terkini &amp; Terpercaya</span></h1>
+    <p>Temukan informasi yang kamu butuhkan dengan cepat, akurat, dan mudah</p>
+  </header>
+
+  <!-- Search -->
+  <div class="search-card">
+    <form action="/" method="GET">
+      <div class="search-row">
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="8.5" cy="8.5" r="5.5"/><path d="M14 14l3.5 3.5" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="text"
+            name="q"
+            class="search-input"
+            placeholder="Masukkan kata kunci pencarian..."
+            value="{{ query }}"
+            required
+            autocomplete="off"
+          >
+        </div>
         <select name="limit" class="select-limit">
-            <option value="5" {% if limit == 5 %}selected{% endif %}>Tampilkan: 5</option>
-            <option value="10" {% if limit == 10 %}selected{% endif %}>Tampilkan: 10</option>
-            <option value="15" {% if limit == 15 %}selected{% endif %}>Tampilkan: 15</option>
-            <option value="20" {% if limit == 20 %}selected{% endif %}>Tampilkan: 20</option>
+          <option value="5"  {% if limit == 5  %}selected{% endif %}>5 hasil</option>
+          <option value="10" {% if limit == 10 %}selected{% endif %}>10 hasil</option>
+          <option value="15" {% if limit == 15 %}selected{% endif %}>15 hasil</option>
+          <option value="20" {% if limit == 20 %}selected{% endif %}>20 hasil</option>
         </select>
-
-        <button type="submit" class="btn btn-search">🔍 Cari</button>
-        <a href="/" class="btn btn-reset">✕ Reset</a>
+        <button type="submit" class="btn-search">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="8.5" cy="8.5" r="5.5"/><path d="M14 14l3.5 3.5" stroke-linecap="round"/>
+          </svg>
+          Cari
+        </button>
+        <a href="/" class="btn-reset">Reset</a>
+      </div>
     </form>
+  </div>
 
-    <div>
-        {% if query %}
-            <div class="info-text">
-                Menampilkan <b>{{ results|length }}</b> hasil untuk query: <span class="highlight">"{{ query }}"</span>
-            </div>
-
-            {% if results %}
-                {% for item in results %}
-                    <div class="card-hasil">
-                        <div class="card-top">
-                            <span class="badge-skor">#{{ item.rank }} &nbsp;·&nbsp; Skor: {{ item.score }}</span>
-                            <span class="text-tanggal">📅 {{ item.tanggal }}</span>
-                        </div>
-                        <div class="card-judul">{{ item.judul }}</div>
-                        <div class="card-isi">{{ item.isi }}</div>
-                        
-                        {% if item.link and item.link.startswith('http') %}
-                            <a href="{{ item.link }}" target="_blank" class="card-link">🔗 Baca artikel lengkap</a>
-                        {% else %}
-                            <span class="no-link">Link tidak tersedia</span>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="kosong">
-                    Tidak ada hasil ditemukan yang cocok dengan kata kunci tersebut.
-                </div>
-            {% endif %}
-        {% endif %}
+  <!-- Results area -->
+  {% if query %}
+    <div class="info-bar">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 002 0V9H9z" clip-rule="evenodd"/>
+      </svg>
+      Hasil untuk <span class="info-kw">"{{ query }}"</span>
+      <span class="info-count">{{ results|length }} ditemukan</span>
     </div>
+
+    {% if results %}
+      {% for item in results %}
+        <div class="card">
+          <div class="card-meta">
+            <div class="rank-badge">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              #{{ item.rank }}
+            </div>
+            <div class="score-pip">
+              <div class="score-bar-wrap">
+                <div class="score-bar" data-score="{{ (item.score * 100)|int }}"></div>
+              </div>
+              {{ item.score }}
+            </div>
+            <div class="date-pill">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+              {{ item.tanggal }}
+            </div>
+          </div>
+
+          <div class="card-title">{{ item.judul }}</div>
+          <div class="card-snippet">{{ item.isi }}</div>
+
+          <div class="card-footer">
+            {% if item.link and item.link.startswith('http') %}
+              <a href="{{ item.link }}" target="_blank" rel="noopener" class="read-link">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 3h6v6M10 10L17 3M8 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Baca artikel lengkap
+              </a>
+            {% else %}
+              <span class="no-link">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781z" clip-rule="evenodd"/>
+                </svg>
+                Link tidak tersedia
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+
+    {% else %}
+      <div class="state-empty">
+        <div class="icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+            <line x1="11" y1="8" x2="11" y2="14" stroke-linecap="round"/>
+            <line x1="8" y1="11" x2="14" y2="11" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Tidak ada hasil ditemukan</h3>
+        <p>Coba gunakan kata kunci yang berbeda atau lebih umum.</p>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="state-empty">
+      <div class="icon-wrap">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Mulai pencarian artikel</h3>
+      <p>Masukkan kata kunci di atas untuk mencari artikel yang relevan menggunakan AI.</p>
+    </div>
+  {% endif %}
+
 </div>
 
+<script>
+document.querySelectorAll('.score-bar[data-score]').forEach(function(el) {
+  el.style.width = el.getAttribute('data-score') + '%';
+});
+</script>
+
+<script>
+(function () {
+  var canvas = document.getElementById('bg-canvas');
+  var ctx = canvas.getContext('2d');
+  var W, H, nodes, edges;
+  var NODE_COUNT = 60;
+  var CONNECT_DIST = 140;
+  var RAF;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initNodes() {
+    nodes = [];
+    for (var i = 0; i < NODE_COUNT; i++) {
+      var tier = Math.random();
+      nodes.push({
+        x:  Math.random() * W,
+        y:  Math.random() * H,
+        vx: (Math.random() - .5) * .28,
+        vy: (Math.random() - .5) * .28,
+        r:  tier > .85 ? 2.4 : tier > .55 ? 1.6 : 1.0,
+        a:  tier > .85 ? .75 : tier > .55 ? .45 : .22
+      });
+    }
+  }
+
+  function buildEdges() {
+    edges = [];
+    for (var i = 0; i < nodes.length; i++) {
+      for (var j = i + 1; j < nodes.length; j++) {
+        var dx = nodes[i].x - nodes[j].x;
+        var dy = nodes[i].y - nodes[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECT_DIST) {
+          edges.push({ i: i, j: j, d: dist });
+        }
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    for (var n = 0; n < nodes.length; n++) {
+      var nd = nodes[n];
+      nd.x += nd.vx;
+      nd.y += nd.vy;
+      if (nd.x < -20) nd.x = W + 20;
+      if (nd.x > W + 20) nd.x = -20;
+      if (nd.y < -20) nd.y = H + 20;
+      if (nd.y > H + 20) nd.y = -20;
+    }
+
+    buildEdges();
+
+    for (var e = 0; e < edges.length; e++) {
+      var ed = edges[e];
+      var na = nodes[ed.i];
+      var nb = nodes[ed.j];
+      var alpha = (1 - ed.d / CONNECT_DIST) * 0.18;
+      ctx.beginPath();
+      ctx.moveTo(na.x, na.y);
+      ctx.lineTo(nb.x, nb.y);
+      ctx.strokeStyle = 'rgba(96,165,250,' + alpha + ')';
+      ctx.lineWidth = .6;
+      ctx.stroke();
+    }
+
+    for (var m = 0; m < nodes.length; m++) {
+      var nm = nodes[m];
+      ctx.beginPath();
+      ctx.arc(nm.x, nm.y, nm.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(99,179,255,' + nm.a + ')';
+      ctx.fill();
+    }
+
+    RAF = requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', function () {
+    resize();
+    initNodes();
+  });
+
+  resize();
+  initNodes();
+  draw();
+})();
+</script>
 </body>
 </html>
