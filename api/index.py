@@ -93,7 +93,7 @@ def search_articles(query_raw, top_n=5):
 @app.route('/')
 def home():
     query = request.args.get('q', '')
-    limit = request.args.get('limit', 5, type=int)
+    limit = request.args.get('limit', 10, type=int)
     results = []
     
     if query:
