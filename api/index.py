@@ -47,7 +47,7 @@ IDX_ISI     = 4
 # 3. FUNGSI LOGIKA PENCARIAN (DARI COLAB KAMU)
 def search_articles(query_raw, top_n=5):
     if not processed_paper or not paper:
-        return []
+        return [], 0
 
     query = query_raw.lower()
     remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
@@ -57,7 +57,7 @@ def search_articles(query_raw, top_n=5):
     query = [stemmer.stem(w) for w in query]
 
     if not query:
-        return []
+        return [], 0
 
     vectorizer2 = TfidfVectorizer(use_idf=True)
     corpus = [' '.join(query)] + processed_paper
@@ -65,41 +65,40 @@ def search_articles(query_raw, top_n=5):
     scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
     ranked_idx = np.argsort(-scores)
 
-    results = []
+    all_results = []
     seen = set()
     for i in ranked_idx:
         if scores[i] <= 0.0:
             break
         if i not in seen:
             seen.add(i)
-            
-            # Batasi isi pratinjau teks artikel agar rapi
             isi_full = str(paper[i][IDX_ISI])
             isi_preview = isi_full[:250] + '...' if len(isi_full) > 250 else isi_full
-            
-            results.append({
-                'rank'   : len(results) + 1,
+            all_results.append({
+                'rank'   : len(all_results) + 1,
                 'score'  : round(float(scores[i]), 4),
                 'judul'  : paper[i][IDX_JUDUL],
                 'tanggal': paper[i][IDX_TANGGAL],
                 'link'   : paper[i][IDX_LINK],
                 'isi'    : isi_preview,
             })
-        if len(results) >= top_n:
-            break
-    return results
+
+    total = len(all_results)
+    results = all_results[:top_n]
+    return results, total
 
 # 4. PATH ROUTING WEB FLASK
 @app.route('/')
 def home():
     query = request.args.get('q', '')
-    limit = request.args.get('limit', 10, type=int)
+    limit = request.args.get('limit', 5, type=int)
     results = []
     
+    total = 0
     if query:
-        results = search_articles(query, top_n=limit)
-        
-    return render_template('index.html', query=query, results=results, limit=limit)
+        results, total = search_articles(query, top_n=limit)
+
+    return render_template('index.html', query=query, results=results, limit=limit, total=total)
 
 # Diperlukan untuk Vercel Serverless
 app.wsgi_app = app.wsgi_app

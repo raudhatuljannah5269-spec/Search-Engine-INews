@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Article Search</title>
+<title>Article Search - Kelompok 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -35,7 +35,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Animated canvas background ── */
 #bg-canvas {
   position: fixed;
   inset: 0;
@@ -44,7 +43,6 @@ body {
   pointer-events: none;
 }
 
-/* ── Layout ── */
 .page {
   position: relative;
   z-index: 1;
@@ -86,7 +84,7 @@ body {
 }
 
 .header h1 {
-  font-size: clamp(28px, 5vw, 40px);
+  font-size: clamp(26px, 5vw, 40px);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.18;
@@ -100,7 +98,7 @@ body {
   background-clip: text;
 }
 .header p {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text2);
   line-height: 1.6;
 }
@@ -110,22 +108,16 @@ body {
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 16px;
   margin-bottom: 14px;
-  backdrop-filter: blur(12px);
 }
 
-.search-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
+/* Baris 1: input pencarian */
 .input-wrap {
-  flex: 1;
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 }
 .input-icon {
   position: absolute;
@@ -153,25 +145,33 @@ body {
   box-shadow: 0 0 0 3px rgba(59,130,246,.10);
 }
 
+/* Baris 2: select + tombol */
+.search-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .select-limit {
-  height: 46px;
+  flex: 1;
+  height: 42px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text2);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  padding: 0 12px;
+  padding: 0 10px;
   outline: none;
   cursor: pointer;
-  min-width: 108px;
   transition: border-color .2s;
 }
 .select-limit:focus { border-color: rgba(99,130,246,.55); }
 
 .btn-search {
-  height: 46px;
-  padding: 0 22px;
+  flex: 2;
+  height: 42px;
+  padding: 0 18px;
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   border: none;
   border-radius: var(--radius);
@@ -183,6 +183,7 @@ body {
   white-space: nowrap;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   letter-spacing: .01em;
   transition: opacity .2s, transform .12s;
@@ -191,8 +192,9 @@ body {
 .btn-search:active { transform: scale(.97); }
 
 .btn-reset {
-  height: 46px;
-  padding: 0 16px;
+  flex: 1;
+  height: 42px;
+  padding: 0 12px;
   background: transparent;
   border: 1px solid var(--border2);
   border-radius: var(--radius);
@@ -205,9 +207,10 @@ body {
   text-decoration: none;
   display: flex;
   align-items: center;
+  justify-content: center;
   transition: background .2s, border-color .2s;
 }
-.btn-reset:hover { background: rgba(255,255,255,.04); border-color: var(--border); }
+.btn-reset:hover { background: rgba(255,255,255,.04); }
 
 /* ── Info bar ── */
 .info-bar {
@@ -218,12 +221,10 @@ body {
   color: var(--text2);
   padding: 10px 4px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 .info-bar svg { opacity: .5; flex-shrink: 0; }
-.info-kw {
-  font-weight: 600;
-  color: #93c5fd;
-}
+.info-kw { font-weight: 600; color: #93c5fd; }
 .info-count {
   margin-left: auto;
   background: rgba(59,130,246,.12);
@@ -240,7 +241,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 22px 24px;
+  padding: 18px 18px;
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
@@ -261,8 +262,8 @@ body {
 .card-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 .rank-badge {
@@ -278,8 +279,6 @@ body {
   color: #60a5fa;
   letter-spacing: .02em;
 }
-.rank-badge svg { opacity: .7; }
-
 .score-pip {
   display: flex;
   align-items: center;
@@ -288,7 +287,7 @@ body {
   color: var(--text3);
 }
 .score-bar-wrap {
-  width: 56px;
+  width: 48px;
   height: 4px;
   background: rgba(255,255,255,.06);
   border-radius: 4px;
@@ -299,7 +298,6 @@ body {
   border-radius: 4px;
   background: linear-gradient(90deg, #3b82f6, #6366f1);
 }
-
 .date-pill {
   margin-left: auto;
   display: flex;
@@ -308,29 +306,21 @@ body {
   font-size: 12px;
   color: var(--text3);
 }
-.date-pill svg { opacity: .5; }
 
 .card-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #e8f0fe;
   line-height: 1.45;
-  margin-bottom: 10px;
-  letter-spacing: -.01em;
+  margin-bottom: 8px;
 }
-
 .card-snippet {
   font-size: 13px;
   color: var(--text2);
   line-height: 1.7;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
-
-.card-footer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.card-footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .read-link {
   display: inline-flex;
   align-items: center;
@@ -346,8 +336,6 @@ body {
   transition: background .2s, border-color .2s;
 }
 .read-link:hover { background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.45); }
-.read-link svg { opacity: .75; }
-
 .no-link {
   font-size: 12px;
   color: var(--text3);
@@ -378,18 +366,45 @@ body {
 .state-empty h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 .state-empty p  { font-size: 13px; color: var(--text2); }
 
-/* ── Divider ── */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0 0 20px;
+/* ── Desktop: search row sejajar ── */
+@media (min-width: 560px) {
+  .search-card { padding: 20px; }
+  .input-wrap { margin-bottom: 0; }
+
+  .search-form-inner {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .search-form-inner .input-wrap { flex: 1; }
+  .search-form-inner .search-actions {
+    display: contents;
+  }
+  .select-limit {
+    flex: none;
+    width: 118px;
+    height: 46px;
+  }
+  .btn-search {
+    flex: none;
+    height: 46px;
+    width: auto;
+    padding: 0 22px;
+  }
+  .btn-reset {
+    flex: none;
+    height: 46px;
+    width: auto;
+    padding: 0 16px;
+  }
 }
 
-@media (max-width: 560px) {
-  .search-row { flex-wrap: wrap; }
-  .select-limit, .btn-reset { display: none; }
-  .btn-search { flex: 1; justify-content: center; }
-  .card { padding: 18px 16px; }
+/* ── Mobile fine-tuning ── */
+@media (max-width: 559px) {
+  .page { padding: 32px 16px 60px; }
+  .header { margin-bottom: 28px; }
+  .card-meta { gap: 6px; }
+  .date-pill { margin-left: 0; }
 }
 </style>
 </head>
@@ -399,7 +414,6 @@ body {
 
 <div class="page">
 
-  <!-- Header -->
   <header class="header">
     <div class="logo-row">
       <div class="logo-dot"></div>
@@ -409,10 +423,9 @@ body {
     <p>Temukan informasi yang kamu butuhkan dengan cepat, akurat, dan mudah</p>
   </header>
 
-  <!-- Search -->
   <div class="search-card">
     <form action="/" method="GET">
-      <div class="search-row">
+      <div class="search-form-inner">
         <div class="input-wrap">
           <svg class="input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="8.5" cy="8.5" r="5.5"/><path d="M14 14l3.5 3.5" stroke-linecap="round"/>
@@ -427,32 +440,35 @@ body {
             autocomplete="off"
           >
         </div>
-        <select name="limit" class="select-limit">
-          <option value="10" {% if limit == 10 %}selected{% endif %}>10 hasil</option>
-          <option value="20" {% if limit == 20 %}selected{% endif %}>20 hasil</option>
-          <option value="30" {% if limit == 30 %}selected{% endif %}>30 hasil</option>
-          <option value="40" {% if limit == 40 %}selected{% endif %}>40 hasil</option>
-          <option value="50" {% if limit == 50 %}selected{% endif %}>50 hasil</option>
-        </select>
-        <button type="submit" class="btn-search">
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="8.5" cy="8.5" r="5.5"/><path d="M14 14l3.5 3.5" stroke-linecap="round"/>
-          </svg>
-          Cari
-        </button>
-        <a href="/" class="btn-reset">Reset</a>
+        <div class="search-actions">
+          <select name="limit" class="select-limit" onchange="this.form.submit()">
+            <option value="10" {% if limit == 10 %}selected{% endif %}>10 hasil</option>
+            <option value="20" {% if limit == 20 %}selected{% endif %}>20 hasil</option>
+            <option value="30" {% if limit == 30 %}selected{% endif %}>30 hasil</option>
+            <option value="40" {% if limit == 40 %}selected{% endif %}>40 hasil</option>
+            <option value="50" {% if limit == 50 %}selected{% endif %}>50 hasil</option>
+          </select>
+          <button type="submit" class="btn-search">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="8.5" cy="8.5" r="5.5"/><path d="M14 14l3.5 3.5" stroke-linecap="round"/>
+            </svg>
+            Cari
+          </button>
+          <a href="/" class="btn-reset">Reset</a>
+        </div>
       </div>
     </form>
   </div>
 
-  <!-- Results area -->
   {% if query %}
     <div class="info-bar">
       <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 002 0V9H9z" clip-rule="evenodd"/>
       </svg>
       Hasil untuk <span class="info-kw">"{{ query }}"</span>
-      <span class="info-count">{{ results|length }} ditemukan</span>
+      <span class="info-count">
+        Menampilkan {{ results|length }} dari {{ total }} artikel ditemukan
+      </span>
     </div>
 
     {% if results %}
@@ -524,7 +540,7 @@ body {
         </svg>
       </div>
       <h3>Mulai pencarian artikel</h3>
-      <p>Masukkan kata kunci di atas untuk mencari artikel yang relevan menggunakan AI.</p>
+      <p>Masukkan kata kunci di atas untuk mencari artikel yang relevan.</p>
     </div>
   {% endif %}
 
@@ -543,7 +559,6 @@ document.querySelectorAll('.score-bar[data-score]').forEach(function(el) {
   var W, H, nodes, edges;
   var NODE_COUNT = 60;
   var CONNECT_DIST = 140;
-  var RAF;
 
   function resize() {
     W = canvas.width  = window.innerWidth;
@@ -572,41 +587,32 @@ document.querySelectorAll('.score-bar[data-score]').forEach(function(el) {
         var dx = nodes[i].x - nodes[j].x;
         var dy = nodes[i].y - nodes[j].y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < CONNECT_DIST) {
-          edges.push({ i: i, j: j, d: dist });
-        }
+        if (dist < CONNECT_DIST) edges.push({ i: i, j: j, d: dist });
       }
     }
   }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-
     for (var n = 0; n < nodes.length; n++) {
       var nd = nodes[n];
-      nd.x += nd.vx;
-      nd.y += nd.vy;
+      nd.x += nd.vx; nd.y += nd.vy;
       if (nd.x < -20) nd.x = W + 20;
       if (nd.x > W + 20) nd.x = -20;
       if (nd.y < -20) nd.y = H + 20;
       if (nd.y > H + 20) nd.y = -20;
     }
-
     buildEdges();
-
     for (var e = 0; e < edges.length; e++) {
       var ed = edges[e];
-      var na = nodes[ed.i];
-      var nb = nodes[ed.j];
       var alpha = (1 - ed.d / CONNECT_DIST) * 0.18;
       ctx.beginPath();
-      ctx.moveTo(na.x, na.y);
-      ctx.lineTo(nb.x, nb.y);
+      ctx.moveTo(nodes[ed.i].x, nodes[ed.i].y);
+      ctx.lineTo(nodes[ed.j].x, nodes[ed.j].y);
       ctx.strokeStyle = 'rgba(96,165,250,' + alpha + ')';
       ctx.lineWidth = .6;
       ctx.stroke();
     }
-
     for (var m = 0; m < nodes.length; m++) {
       var nm = nodes[m];
       ctx.beginPath();
@@ -614,18 +620,11 @@ document.querySelectorAll('.score-bar[data-score]').forEach(function(el) {
       ctx.fillStyle = 'rgba(99,179,255,' + nm.a + ')';
       ctx.fill();
     }
-
-    RAF = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
   }
 
-  window.addEventListener('resize', function () {
-    resize();
-    initNodes();
-  });
-
-  resize();
-  initNodes();
-  draw();
+  window.addEventListener('resize', function () { resize(); initNodes(); });
+  resize(); initNodes(); draw();
 })();
 </script>
 </body>
